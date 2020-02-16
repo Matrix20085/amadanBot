@@ -1,9 +1,8 @@
 
 #ToDo:
-# Remove hard coded DBG token
-# 'New' role as global
-# 'Amadans' role as global
-# Server as global
+# Create websoket for DGB event streaming
+# Parse events
+# Send ping to discord with wanted events
 
 import ssl
 import json
