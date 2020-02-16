@@ -33,7 +33,8 @@ testChannel = int(configOptions.get('discordIDs','testChannel'))
 botID = int(configOptions.get('discordIDs','botID'))
 serverID = int(configOptions.get('discordIDs','serverID'))
 
-dbgURL = "https://census.daybreakgames.com/s:" + dbgToken + "/get/ps2:v2/outfit/?name=Amadan&c:resolve=member_character(name)"
+
+dbgBaseUrl = "https://census.daybreakgames.com/s:" + dbgToken + "/get/ps2:v2/"
 
 
 
@@ -62,7 +63,7 @@ async def on_message(message):
     if (message.guild == None and message.author.id != botID):
 
         # Requesting and parsing outfit members
-        response = requests.get(dbgURL)
+        response = requests.get(dbgBaseUrl + "outfit/?name=Amadan&c:resolve=member_character(name)")
         members = response.json()['outfit_list'][0]['members']
 
         # Getting discord server info since this came from a DM
@@ -117,14 +118,50 @@ async def sendMessage(msg):
     channel = server.get_channel(testChannel)
     await channel.send(msg)
 
-
-
+# Starting Discord Bot
 discordBot = threading.Thread(target=client.run, args=(discordToken,))
 discordBot.start()
+
+async def dbgConnect():
+    endpoint = "wss://push.planetside2.com/streaming?environment=ps2&service-id=s:" + dbgToken
+    async with websockets.connect(endpoint, ssl=True) as websocket:
+        print("Send subscription string to DBG...")
+        await websocket.send({"service":"event","action":"subscribe","worlds":["17"],"eventNames":["MetagameEvent"]})
+        print("String sent.")
+
+
+
+async def dbgClient():
+    endpoint = "wss://push.planetside2.com/streaming?environment=ps2&service-id=s:" + dbgToken
+    async with websockets.connect(endpoint, ssl=True) as websocket:
+        #for x in range (0,9):
+            #resp = await websocket.recv()
+            #print(resp)
+        print("Send subscription string to DBG...")
+        await websocket.send('{"service":"event","action":"subscribe","worlds":["1","9","10","11","13","17","18","19","25","1000","1001"],"eventNames":["MetagameEvent"]}')
+        print("String sent.")
+        
+        message = await websocket.recv()
+        while message:
+            messageJson = json.loads(message)
+
+            try:
+                #print(messageJson['payload'])
+                eventID = messageJson['payload']['metagame_event_id']
+                print(eventID)
+                response = requests.get(dbgBaseUrl + "metagame_event?c:limit=1000")
+                ids = response.json()['metagame_event_list']
+                for id in ids:
+                    if id['metagame_event_id'] == eventID:
+                        print(id['name']['en'])
+            except:
+                pass
+            message = await websocket.recv()
+
+
+asyncio.get_event_loop().run_until_complete(dbgClient())
 
 print("---Waiting for bot---")
 time.sleep(5)
 print("---Done waiting---")
 task = client.loop.create_task(sendMessage("Yo"))
-
-#Branch test
