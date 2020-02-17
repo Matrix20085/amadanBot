@@ -119,36 +119,26 @@ async def sendMessage(msg):
     await channel.send(msg)
 
 # Starting Discord Bot
-discordBot = threading.Thread(target=client.run, args=(discordToken,))
-discordBot.start()
-
-async def dbgConnect():
-    endpoint = "wss://push.planetside2.com/streaming?environment=ps2&service-id=s:" + dbgToken
-    async with websockets.connect(endpoint, ssl=True) as websocket:
-        print("Send subscription string to DBG...")
-        await websocket.send({"service":"event","action":"subscribe","worlds":["17"],"eventNames":["MetagameEvent"]})
-        print("String sent.")
+discordBotThread = threading.Thread(target=client.run, args=(discordToken,))
+discordBotThread.start()
 
 
-
+# Standing up DBG client
 async def dbgClient():
     endpoint = "wss://push.planetside2.com/streaming?environment=ps2&service-id=s:" + dbgToken
     async with websockets.connect(endpoint, ssl=True) as websocket:
-        #for x in range (0,9):
-            #resp = await websocket.recv()
-            #print(resp)
         print("Send subscription string to DBG...")
-        await websocket.send('{"service":"event","action":"subscribe","worlds":["1","9","10","11","13","17","18","19","25","1000","1001"],"eventNames":["MetagameEvent"]}')
-        print("String sent.")
+        await websocket.send('{"service":"event","action":"subscribe","worlds":["17"],"eventNames":["MetagameEvent"]}')
         
+        # Reciving first message to start the loop
         message = await websocket.recv()
         while message:
             messageJson = json.loads(message)
 
+            # Check if the event is a metagame even
+            # Need to parse even further to check for type "9"? http://census.daybreakgames.com/get/ps2:v2/metagame_event?c:limit=1000
             try:
-                #print(messageJson['payload'])
                 eventID = messageJson['payload']['metagame_event_id']
-                print(eventID)
                 response = requests.get(dbgBaseUrl + "metagame_event?c:limit=1000")
                 ids = response.json()['metagame_event_list']
                 for id in ids:
@@ -158,10 +148,10 @@ async def dbgClient():
                 pass
             message = await websocket.recv()
 
-
-asyncio.get_event_loop().run_until_complete(dbgClient())
+dbgClientThread = threading.Thread(target=asyncio.get_event_loop().run_until_complete(dbgClient()))
+dbgClientThread.start()
 
 print("---Waiting for bot---")
 time.sleep(5)
 print("---Done waiting---")
-task = client.loop.create_task(sendMessage("Yo"))
+client.loop.create_task(sendMessage("Yo"))
