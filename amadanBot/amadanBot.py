@@ -2,6 +2,7 @@
 #ToDo:
 # Include what continet is opening
 # Use sendMessage() for botLogs
+# Send who started/won alert
 
 import ssl
 import json
@@ -46,6 +47,7 @@ client = commands.Bot(command_prefix = '>')
 @client.event
 async def on_ready():
     print("Bot Ready")
+    client.loop.create_task(sendMessage("Amadan Bot Ready",botLogChannel))
 
 
 # Automaticaly adds 'New' on join and sends DM asking for IGN of PS2
@@ -53,6 +55,7 @@ async def on_ready():
 async def on_member_join(member):
     role = member.guild.get_role(newRole)
     await member.add_roles(role)
+    client.loop.create_task(sendMessage(f"Adding 'New' role for {member.display_name}",botLogChannel))
     channel = await member.create_dm()
     await channel.send("Please type you IGN if you are a member of out Planetside 2 outfit. If you do not play Planetside ignore this message.")
 
@@ -82,6 +85,8 @@ async def on_message(message):
                 role = discord.utils.get(server.roles, id=amadansRole)
                 discordMember = server.get_member(message.author.id)
                 await discordMember.add_roles(role)
+                client.loop.create_task(sendMessage(f"Adding 'Amadan' role for {discordMember.display_name}",botLogChannel))
+
 
                 # Getting 'New; role object and removing from member
                 role = discord.utils.get(server.roles, id=newRole)
@@ -98,6 +103,8 @@ async def on_message(message):
             mods = server.get_role(modsRole)
             await channel.send(f"{message.author.mention} seems to be incapable of spelling thier IGN correctly. Can you help them out {mods.mention}!")
     await client.process_commands(message) # Send the message to see if other commands are embedded 
+
+
 
 # List all members with 'New' role
 @client.command()
@@ -125,6 +132,7 @@ async def dbgClient():
     endpoint = "wss://push.planetside2.com/streaming?environment=ps2&service-id=s:" + dbgToken
     async with websockets.connect(endpoint, ssl=True) as websocket:
         print("Send subscription string to DBG...")
+        client.loop.create_task(sendMessage("Connected to DBG Event Stream",botLogChannel))
         await websocket.send('{"service":"event","action":"subscribe","worlds":["17"],"eventNames":["MetagameEvent"]}')
         # Reciving first message to start the loop
         message = await websocket.recv()
@@ -151,7 +159,9 @@ async def dbgClient():
 # Starting Discord Bot
 discordBotThread = threading.Thread(target=client.run, args=(discordToken,))
 discordBotThread.start()
+
 time.sleep(10)
+
 # Starting DBG Stream 
 dbgClientThread = threading.Thread(target=asyncio.run(dbgClient()))
 dbgClientThread.start()
