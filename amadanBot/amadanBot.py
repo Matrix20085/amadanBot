@@ -156,7 +156,7 @@ async def dbgClient():
                         discordMessage += f"NC: {int(float(messageJson['payload']['faction_nc']))}   TR: {int(float(messageJson['payload']['faction_tr']))}   VS: {int(float(messageJson['payload']['faction_vs']))}\n"
                         discordMessage += "=" * 45
 
-                        client.loop.create_task(sendMessage(discordMessage,testChannel))
+                        client.loop.create_task(sendMessage(discordMessage,automatedPingsChannel))
                         client.loop.create_task(sendMessage(message,botLogChannel))
             message = await websocket.recv()
 
