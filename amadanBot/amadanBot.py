@@ -1,8 +1,7 @@
 
 #ToDo:
-# Create websoket for DGB event streaming
-# Parse events
-# Send ping to discord with wanted events
+# Include what continet is opening
+# Use sendMessage() for botLogs
 
 import ssl
 import json
@@ -30,6 +29,7 @@ amadansRole = int(configOptions.get('discordIDs','amadansRole'))
 modsRole = int(configOptions.get('discordIDs','modsRole'))
 entranceChannel = int(configOptions.get('discordIDs','entranceChannel'))
 testChannel = int(configOptions.get('discordIDs','testChannel'))
+botLogChannel = int(configOptions.get('discordIDs','botLogsChannel'))
 botID = int(configOptions.get('discordIDs','botID'))
 serverID = int(configOptions.get('discordIDs','serverID'))
 
@@ -113,14 +113,10 @@ async def ping(ctx):
 
 
 # Sends message to testing channel
-async def sendMessage(msg):
+async def sendMessage(msg, channelID):
     server = client.get_guild(serverID)
-    channel = server.get_channel(testChannel)
+    channel = server.get_channel(channelID)
     await channel.send(msg)
-
-# Starting Discord Bot
-discordBotThread = threading.Thread(target=client.run, args=(discordToken,))
-discordBotThread.start()
 
 
 # Standing up DBG client
@@ -129,29 +125,32 @@ async def dbgClient():
     async with websockets.connect(endpoint, ssl=True) as websocket:
         print("Send subscription string to DBG...")
         await websocket.send('{"service":"event","action":"subscribe","worlds":["17"],"eventNames":["MetagameEvent"]}')
-        
         # Reciving first message to start the loop
         message = await websocket.recv()
         while message:
             messageJson = json.loads(message)
 
-            # Check if the event is a metagame even
-            # Need to parse even further to check for type "9"? http://census.daybreakgames.com/get/ps2:v2/metagame_event?c:limit=1000
+            # Check if the event is a metagame event
+            # Match Event ID to database
+            # Check for type = 9, 9 seems to be continent lock alerts
+            # http://census.daybreakgames.com/get/ps2:v2/metagame_event?c:limit=1000
             try:
                 eventID = messageJson['payload']['metagame_event_id']
                 response = requests.get(dbgBaseUrl + "metagame_event?c:limit=1000")
                 ids = response.json()['metagame_event_list']
                 for id in ids:
-                    if id['metagame_event_id'] == eventID:
-                        print(id['name']['en'])
+                    if id['metagame_event_id'] == eventID and id['type'] == "9":
+                        discordMessage = "A \"" + id['name']['en'] + "\" alert has "+ messageJson['payload']['metagame_event_state_name'] + "!"
+                        client.loop.create_task(sendMessage(discordMessage,botLogChannel))
+                        client.loop.create_task(sendMessage(message,botLogChannel))
             except:
                 pass
             message = await websocket.recv()
 
-dbgClientThread = threading.Thread(target=asyncio.get_event_loop().run_until_complete(dbgClient()))
+# Starting Discord Bot
+discordBotThread = threading.Thread(target=client.run, args=(discordToken,))
+discordBotThread.start()
+time.sleep(10)
+# Starting DBG Stream 
+dbgClientThread = threading.Thread(target=asyncio.run(dbgClient()))
 dbgClientThread.start()
-
-print("---Waiting for bot---")
-time.sleep(5)
-print("---Done waiting---")
-client.loop.create_task(sendMessage("Yo"))
