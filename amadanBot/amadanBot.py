@@ -1,8 +1,6 @@
 
 #ToDo:
-# Include what continet is opening
-# Use sendMessage() for botLogs
-# Send who started/won alert
+# Include what continet is openin
 
 import ssl
 import json
@@ -14,8 +12,10 @@ import threading
 import websockets
 import configparser
 
+from pytz import timezone
+from datetime import datetime
 from discord.ext import commands
-
+ 
 # Private toekns/IDs
 configOptions = configparser.ConfigParser()
 configOptions.read("amadan.cfg")
@@ -95,6 +95,7 @@ async def on_message(message):
 
                 await discordMember.edit(nick=message.content)
                 await message.channel.send("Congratulations, you are now a member in the Discord. Your nickname has been set to your IGN.")
+                client.loop.create_task(sendMessage(f"Changing nickname fomr {discordMember.display_name} to {message.content}",botLogChannel))
                 break
 
         # If not member send mention to mods in entrance channel
@@ -143,17 +144,20 @@ async def dbgClient():
             # Match Event ID to database
             # Check for type = 9, 9 seems to be continent lock alerts
             # http://census.daybreakgames.com/get/ps2:v2/metagame_event?c:limit=1000
-            try:
+            if 'payload' in messageJson:
                 eventID = messageJson['payload']['metagame_event_id']
                 response = requests.get(dbgBaseUrl + "metagame_event?c:limit=1000")
                 ids = response.json()['metagame_event_list']
                 for id in ids:
                     if id['metagame_event_id'] == eventID and id['type'] == "9":
-                        discordMessage = "A \"" + id['name']['en'] + "\" alert has "+ messageJson['payload']['metagame_event_state_name'] + "!"
-                        client.loop.create_task(sendMessage(discordMessage,automatedPingsChannel))
+
+                        currentTime = datetime.now(timezone('EST')).strftime("%m-%d %I:%M %p")
+                        discordMessage = f"A \"{id['name']['en']}\" alert has {messageJson['payload']['metagame_event_state_name']}! ({currentTime} EST)\n"
+                        discordMessage += f"NC: {int(float(messageJson['payload']['faction_nc']))}   TR: {int(float(messageJson['payload']['faction_tr']))}   VS: {int(float(messageJson['payload']['faction_vs']))}\n"
+                        discordMessage += "=" * 45
+
+                        client.loop.create_task(sendMessage(discordMessage,testChannel))
                         client.loop.create_task(sendMessage(message,botLogChannel))
-            except:
-                pass
             message = await websocket.recv()
 
 # Starting Discord Bot
