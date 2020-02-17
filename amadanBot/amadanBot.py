@@ -30,6 +30,7 @@ modsRole = int(configOptions.get('discordIDs','modsRole'))
 entranceChannel = int(configOptions.get('discordIDs','entranceChannel'))
 testChannel = int(configOptions.get('discordIDs','testChannel'))
 botLogChannel = int(configOptions.get('discordIDs','botLogsChannel'))
+automatedPingsChannel = int(configOptions.get('discordIDs','automatedPingsChannel'))
 botID = int(configOptions.get('discordIDs','botID'))
 serverID = int(configOptions.get('discordIDs','serverID'))
 
@@ -141,7 +142,7 @@ async def dbgClient():
                 for id in ids:
                     if id['metagame_event_id'] == eventID and id['type'] == "9":
                         discordMessage = "A \"" + id['name']['en'] + "\" alert has "+ messageJson['payload']['metagame_event_state_name'] + "!"
-                        client.loop.create_task(sendMessage(discordMessage,botLogChannel))
+                        client.loop.create_task(sendMessage(discordMessage,automatedPingsChannel))
                         client.loop.create_task(sendMessage(message,botLogChannel))
             except:
                 pass
