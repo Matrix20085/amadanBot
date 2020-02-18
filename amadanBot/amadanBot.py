@@ -124,7 +124,7 @@ async def sendMessage(msg, channelID):
     await channel.send(msg)
 
 
-# Standing up DBG client
+# Standing up DBG client 
 async def dbgClient():
     endpoint = "wss://push.planetside2.com/streaming?environment=ps2&service-id=s:" + dbgToken
     async with websockets.connect(endpoint, ssl=True) as websocket:
