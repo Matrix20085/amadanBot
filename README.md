@@ -24,7 +24,11 @@ If the IGN matches a member of the PS2 outfit they are automaticaly assigned  th
 - [ ] Command to check TeamSpeak Users
 - [ ] Command to check Planetside status (continent, pop, alerts)
 - [ ] Automatically move Teamspeak users to AFK channel after given idle time
+- [ ] Display a teamspeak view of server using TSviewer as a discord bot message
+- [ ] Command for a unique user status update for location details in planetside 2
+- [ ] Display an overall online status for users of their respective associated accounts
 ## ToDo: (Server)
 - [x] Thread Discord and DBG client to run at same time
 - [x] Get Discord server object from non-Discord function
 - [ ] Implement encrypted secrets (tokens, Discord IDs)
+- [ ] Link Discord, Teamspeak, and PS2 names associated with unique users in a file
