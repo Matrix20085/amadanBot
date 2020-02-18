@@ -1,7 +1,3 @@
-
-#ToDo:
-# Include what continet is openin
-
 import ssl
 import json
 import time
