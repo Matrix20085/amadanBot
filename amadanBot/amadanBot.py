@@ -89,9 +89,10 @@ async def on_message(message):
                 await discordMember.remove_roles(role)
 
 
-                await discordMember.edit(nick=message.content)
+                oldName = discordMember.display_name
+                await discordMember.edit(nick=member['name']['first'])
                 await message.channel.send("Congratulations, you are now a member in the Discord. Your nickname has been set to your IGN.")
-                client.loop.create_task(sendMessage(f"Changing nickname fomr {discordMember.display_name} to {message.content}",botLogChannel))
+                client.loop.create_task(sendMessage(f"Changing nickname fomr {oldName} to {member['name']['first']}",botLogChannel))
                 break
 
         # If not member send mention to mods in entrance channel
