@@ -12,14 +12,17 @@ If the IGN matches a member of the PS2 outfit they are automaticaly assigned  th
 
 ### Commands (>)
 ###### ping
->Answers "Pong".
+>Answers "Pong"
 ###### listNewMembers
->Displays all members with 'New' role still assigned
+>Returns all members with 'New' role still assigned
+###### encryptThis
+>Returns encrypted string to protected channel
 ## ToDo: (Client)
 - [x] Assign 'New' role for new members
 - [x] Ask for name and check against DBG database, assign role base off answer
 - [x] Command to list 'New' members
 - [x] Send ping on continent lock alerts
+- [x] Command to get encrypted string
 - [ ] Send ping on continent unlock
 - [ ] Command to check TeamSpeak Users
 - [ ] Command to check Planetside status (continent, pop, alerts)
@@ -31,5 +34,5 @@ If the IGN matches a member of the PS2 outfit they are automaticaly assigned  th
 ## ToDo: (Server)
 - [x] Thread Discord and DBG client to run at same time
 - [x] Get Discord server object from non-Discord function
-- [ ] Implement encrypted secrets (tokens, Discord IDs)
+- [X] Implement encrypted secrets (tokens, Discord IDs)
 - [ ] Link Discord, Teamspeak, and PS2 names associated with unique users in a file

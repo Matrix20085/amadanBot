@@ -6,30 +6,33 @@ import asyncio
 import requests
 import threading
 import websockets
-import configparser
 
 from pytz import timezone
 from datetime import datetime
 from discord.ext import commands
+from cryptography.fernet import Fernet as crypt
+
+# Initializing encryption object
+keyFile = open("key.key", 'r')
+key = str.encode(keyFile.read())
+keyFile.close()
+cryptObj = crypt(key)
  
-# Private toekns/IDs
-configOptions = configparser.ConfigParser()
-configOptions.read("amadan.cfg")
 
 # Token Variables
-discordToken = configOptions.get('tokens','discord')
-dbgToken = configOptions.get('tokens','dbg')
+discordToken = cryptObj.decrypt(b"gAAAAABeTU3qWHeMpM55G4d-QaMVCKlZCNgsBOCJ7mLLQGYIdDtrFCEl9pLM5w3AJpjyA2m3zj_D9wpQumBvG2v14ow9NlYqVwqn1L-qo4o6-v25eCGUcbOS0AUcKMBnM6zTcy4mUmOsN6_Nx5CZeUQrQSfu2Kqo4g==").decode('utf8')
+dbgToken = cryptObj.decrypt(b"gAAAAABeTVOYxY6bFU4kSSR3H2yxKhoIhhtjpF6WBXKlMCluIFQmptvAniAg1GLc7YMuiW6Lg_pVMFZaOE_LNy6Hjekz48K8ZpaqTcuvhnRvMJDmkNfbGxg=").decode('utf8')
 
 # ID Variables
-newRole = int(configOptions.get('discordIDs','newRole'))
-amadansRole = int(configOptions.get('discordIDs','amadansRole'))
-modsRole = int(configOptions.get('discordIDs','modsRole'))
-entranceChannel = int(configOptions.get('discordIDs','entranceChannel'))
-testChannel = int(configOptions.get('discordIDs','testChannel'))
-botLogChannel = int(configOptions.get('discordIDs','botLogsChannel'))
-automatedPingsChannel = int(configOptions.get('discordIDs','automatedPingsChannel'))
-botID = int(configOptions.get('discordIDs','botID'))
-serverID = int(configOptions.get('discordIDs','serverID'))
+newRole = int(cryptObj.decrypt(b"gAAAAABeTU3q46ivr76gY5JMzIU56XP7AjOpBQAswXw4SpVbWz39O1dHPQXWkeggZVBs-Cb7RLnuCoHyzbSUz-Of0HCkfcQC1q6uhvGhnhIMvwv7HzOoNmQ=").decode('utf8'))
+amadansRole = int(cryptObj.decrypt(b"gAAAAABeTU3qra-bmdsytSUkMdqI1yyqte46X5BhJv5n9HBaxRCfEzGiR0FouSTAI9BMFy3VoPEXMrj9DGtRlWvgDUG_-FtVDoxJnfwzaGi8HePEpstcHjU=").decode('utf8'))
+modsRole = int(cryptObj.decrypt(b"gAAAAABeTU3q17cQM0i3rTo7Irj6oU03htCcyFVnvucdKSY0wL5jjYrEp0U9KuyjTTm9ISDNlEMqaVXCQG_au_lueQPopDaXNEO923jV7mTxbYyaWkDnyWc=").decode('utf8'))
+entranceChannel = int(cryptObj.decrypt(b"gAAAAABeTU3qZQ1OlbG7ManXAtkXqXmyA4AI0VduWPuKJc7pZ1V3m4QMdV6y_yIszdgbWYX-JnrjbzcWTMdq9NIKHDtqvbR0xjrYC-co9Kf8JH9A3xDInyo=").decode('utf8'))
+testChannel = int(cryptObj.decrypt(b"gAAAAABeTU3q8V9cu5baRFxR2cAZOmyOiOrDYaQjZy-COzYL7-yN2qTegzZ1zCXgxG3GCAwaRseQZdx4XX1AMvUqfags29L2B0mK7QIBcXcfiFavYq-j2-s=").decode('utf8'))
+botLogChannel = int(cryptObj.decrypt(b"gAAAAABeTU3qzSu2piJf0mwQKlc7oJGQ2tiwxFz2AX-RswA92-bp2eHC6cCVB68-XJ2bZKZvcs8CZy1TveSh8KSeyURJiAOYcLP8LnQMtTgpydrvs4XjJvI=").decode('utf8'))
+automatedPingsChannel = int(cryptObj.decrypt(b"gAAAAABeTU3qe6WtGiTIWMPllbgXYiwVIon48H5Ig_abzkx_VanZr0hjIMfrS9QYoEMYvkS6RUE4k0Uvny-WQP4K3ylyifkejsMdoQaHpINblKbO5ywo10c=").decode('utf8'))
+botID = int(cryptObj.decrypt(b"gAAAAABeTU3qlKUmfyHIVC4c_L4GjU59Xh6GWMqfhd7DRUmfw-e5ku_A1qQMGtVQmZuCdW-xunuBABfo302eJcs0gS7jh8_OFUfYRxpKQaYWP7URH9GZViw=").decode('utf8'))
+serverID = int(cryptObj.decrypt(b"gAAAAABeTU3qHObRALYHQ-TYcoVNJ8qJR9e9qyWGDKJHnX6YN_r1a53r32lFuVuJHPddQYMmwEcHVEHEBGUQmkWawd0kmJ3wgNyTnG3MuKNI5zG8CCk8GPY=").decode('utf8'))
 
 
 dbgBaseUrl = "https://census.daybreakgames.com/s:" + dbgToken + "/get/ps2:v2/"
@@ -117,6 +120,10 @@ async def listNewMembers(ctx):
 async def ping(ctx):
     await ctx.send("Pong")
 
+# Encrypts string
+@client.command()
+async def encryptThis(ctx, *, arg):
+    client.loop.create_task(sendMessage(cryptObj.encrypt(str.encode(arg)).decode('utf8'),botLogChannel))
 
 # Sends message to testing channel
 async def sendMessage(msg, channelID):
