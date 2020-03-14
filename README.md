@@ -25,11 +25,11 @@ If the IGN matches a member of the PS2 outfit they are automaticaly assigned  th
 - [x] Command to get encrypted string
 - [ ] Send ping on continent unlock
 - [ ] Command to check TeamSpeak Users
-- [ ] Command to check Planetside status (continent, pop, alerts)
+- [ ] Command to check Planetside status (continents, pop, alerts, # of outfit members online)
 - [ ] Automatically move Teamspeak users to AFK channel after given idle time
 - [ ] Display a teamspeak view of server using TSviewer as a discord bot message
 - [ ] Command for a unique user status update for location details in planetside 2
-- [ ] Display an overall online status for users of their respective associated accounts
+- [ ] Display an overall online status for users of their respective associated accounts (Planetside and TS)
 - [ ] KoS list accessible and editable by only 'OGs'
 - [ ] Update command for bot to check for new version, pull, restart
 ## ToDo: (Server)
@@ -38,4 +38,6 @@ If the IGN matches a member of the PS2 outfit they are automaticaly assigned  th
 - [X] Implement encrypted secrets (tokens, Discord IDs)
 - [ ] Link Discord, Teamspeak, and PS2 names associated with unique users in a file
 - [ ] Controll access to protected functions
+- [ ] Implement database for alerts, logged in outfit members, "recent" Discord members
+- [ ] Debug DBG API crashes
 
